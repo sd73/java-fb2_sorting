@@ -1,8 +1,13 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Скрипт каталогизирует по хуш-сумме fb2 файлы
+ * ============================================
+ * 1 шаг - просчитывается md5 файлы
+ * 2 шаг - файл переносится в каталог хеш[1]/хеш[2]/хеш[3]
+ * 3 шаг - перенесенный файл переименовывается в "md5".fb2
+ * 4 шаг - файл "md5".fb2 архивируется в "md5".zip
+ * 5 шаг - исходный файл удаляется
  */
+
 package fb2_sorting;
 
 import java.io.File;
@@ -26,9 +31,15 @@ public class Fb2_sorting {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
-        String dir = "d:/demidov/temp/fb2";
+        String inputpath = "";
+        if (args.length==0) {
+            inputpath = "/home/demidov/temp/fb2";
+            // inputpath = "d:/demidov/temp/fb2";
+        } else {
+            inputpath = args[0];
+        }
         String ext = ".fb2";
-        fb2Sorting(dir, ext);
+        fb2Sorting(inputpath, ext);
     }
 
     private static void fb2Sorting(String dir, String ext) throws IOException, NoSuchAlgorithmException {
@@ -59,15 +70,17 @@ public class Fb2_sorting {
                 // создаем каталог с подкаталогами  для файла в ...out/MD5[1]/MD5[2]/MD5[3]
                 new File(dir + File.separator + "out" + File.separator + String.valueOf(dst1) + File.separator + String.valueOf(dst2) + File.separator + String.valueOf(dst3)).mkdirs();
                 final File originalFile = new File(dir, f.getName());
-                final File newFile = new File(dir + File.separator + "out" + File.separator + String.valueOf(dst1) + File.separator + String.valueOf(dst2) + File.separator + String.valueOf(dst3), f.getName());
+                //final File newFile = new File(dir + File.separator + "out" + File.separator + String.valueOf(dst1) + File.separator + String.valueOf(dst2) + File.separator + String.valueOf(dst3), f.getName());
+                final File newFile = new File(dir + File.separator + "out" + File.separator + String.valueOf(dst1) + File.separator + String.valueOf(dst2) + File.separator + String.valueOf(dst3), hex+ext);
                 if (originalFile.renameTo(newFile)) {
                     System.out.print("Koпиpoвaниe пpoшлo ycпeшнo.");
                 } else {
                     System.out.print("Koпиpoвaниe нe yдaлocь.");
                 }
+                
                 FileOutputStream fos = new FileOutputStream(dir + File.separator + "out" + File.separator + String.valueOf(dst1) + File.separator + String.valueOf(dst2) + File.separator + String.valueOf(dst3) + File.separator + hex + ".zip");
                 ZipOutputStream zipOut = new ZipOutputStream(fos);
-                File fileToZip = new File(dir + File.separator + "out" + File.separator + String.valueOf(dst1) + File.separator + String.valueOf(dst2) + File.separator + String.valueOf(dst3), f.getName());
+                File fileToZip = new File(dir + File.separator + "out" + File.separator + String.valueOf(dst1) + File.separator + String.valueOf(dst2) + File.separator + String.valueOf(dst3), hex+ext);
                 FileInputStream fis = new FileInputStream(fileToZip);
                 ZipEntry zipEntry = new ZipEntry(fileToZip.getName());
                 zipOut.putNextEntry(zipEntry);
